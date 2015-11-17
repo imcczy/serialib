@@ -1,23 +1,10 @@
 #include <stdio.h>
 #include "serialib.h"
-/*
-typedef struct str{
-	char *name;
-	int id;
-} sss;
-
-void sss_init(sss **s, char* name, int id)
-{
-	*s = (sss *) malloc(sizeof(sss));
-	(*s)->name = name;
-	(*s)->id = id;
-}
-*/
 
 int main(void)
 {
 	serial *s;
-	if (serial_open(&s, "/dev/ttyUSB1", 115200) == 0){
+	if (serial_open(&s, "/dev/ttyUSB0", 115200) == 0){
 		printf("Port opened.\n");
 
 	} else {
@@ -25,73 +12,34 @@ int main(void)
 		return -1;
 	}
 	printf("%s -> %d\n", s->port, s->fd);
-	system("sleep 3");
+	system("sleep 2");
 	
-	char buffer[128];
-	serial_read(s, buffer, '\n', 128);
-	printf("%s %d\n", buffer, strlen(buffer));
-	serial_read(s, buffer, '\n', 128);
-	printf("%s %d\n", buffer, strlen(buffer));
-	serial_read(s, buffer, '\n', 128);
-	printf("%s %d\n", buffer, strlen(buffer));
+	char buffer[21];
+	char data[8] = {0,0,0,0,0,0,0,0};
+	int index = 0;
+	serial_read(s, buffer, 21);
 
-
-	//while (1) {
-/*
-		serial_read(s, buffer, '\n', 128);
-		printf("%s", buffer);
-		
-		timer *t;
-		timer_init(&t);
-
-		serial_read(s, buffer, '\n', 128);
-		printf("%s", buffer);
-		
-		serial_write(s, "ls\r\n");
-		sleep(1);
-
-		printf("\nt=%d\n", timer_elapsed(t));
-		//system("sleep 1");
-		
-		serial_read(s, buffer, '\n', 128);
-		printf("%s", buffer);
-		serial_read(s, buffer, '\n', 128);
-		printf("%s", buffer);
-		serial_read(s, buffer, '\n', 128);
-		printf("%s", buffer);
-
-	//}
-
-
-
-
-*/
-
-
-
-
-
-
-/*
-	serial_read(s, buffer, '\n', 128);
-	printf("-> %s\n", buffer);
-	serial_read(s, buffer, '\n', 128);
-	printf("-> %s\n", buffer);
-	serial_read(s, buffer, '\n', 128);
-	printf("-> %s\n", buffer);
-*/
-
-/*
-	char p;
-	int i;
-	i = serial_read_char(s, &p);
-	printf("-> %c %d ", p, i);
-*/
-/*
-	sss *es;
-	//es = (sss *) malloc(sizeof(sss));
-	sss_init(&es, "ahoj", 5);
-	printf("%s, %d\n",es->name, es->id);
-*/
+	for (int i = 0; i < 12; ++i){
+        if ((int)buffer[i] == -86 && (int)buffer[i+7] == -1)
+        {
+        	index = i;
+        	break;
+        }
+	}
+	for (int i = 0; i < 8; ++i)
+	{
+		data[i]=(int)buffer[index+i];
+		//printf("%d ",data[i]);
+		//printf("\n");
+	}
+	double temperatrue = 0;
+	double humidity = 0;
+	temperatrue = (data[2]*256 + data[3]) / 100.00;
+	humidity = (data[4]*256 + data[5]) / 100.00;
+	//printf("%f,%f\n", temperatrue,humidity);
+	FILE *fp;
+	fp = fopen("data.txt","w");
+	fprintf(fp,"[{ \"Name\":\"T\", \"Value\":\"%.2f\" }, { \"Name\":\"H\", \"Value\":\"%.2f\" }]\n", temperatrue,humidity);
+	return 0;
 }
 

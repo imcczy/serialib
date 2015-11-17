@@ -48,16 +48,18 @@ int serial_open(serial **s, char* port, const unsigned int baud)
 
 int serial_read_char(serial *s, char *p)
 {
-/*
-	if (read(s,fdm p, 1) )
-	while (read(s.fd, p, 1) != 1)
-		;
-	return 1;
-*/
-	return (read(s->fd, p, 1) == 1) ? 0 : -1; 
+	return (read(s->fd, p, 1) == 1) ? 0 : -1;
+	/*
+        if (read(s->fd, p, 1) == 1){
+		printf("%d\n", (int)*p);
+		return 0;
+	}
+	else
+		return -1; 
+	*/
 }
 
-int serial_read(serial *s, char *buf, char eol, unsigned int len)
+int serial_read(serial *s, char *buf, unsigned int len)
 {
 	int i = 0;
 	while (i < len-1) {
@@ -66,11 +68,6 @@ int serial_read(serial *s, char *buf, char eol, unsigned int len)
 		if (j != 0){
 			buf[i-1] = '\0';
 			return -1;
-		}
-
-		if (buf[i-1] == eol){
-			buf[i] = '\0';
-			return 1;
 		}
 	}
 
@@ -90,29 +87,3 @@ int serial_write(serial *s, char* str)
 		return -1;
 	return 0;
 }
-
-
-void timer_init(timer **t)
-{
-	*t = (timer *) malloc(sizeof(timer));
-	gettimeofday(*t, NULL);
-}
-
-unsigned long int timer_elapsed(timer *t)
-{
-    timer CurrentTime;
-    int sec,usec;
-    gettimeofday(&CurrentTime, NULL);                                   // Get current time
-    sec=CurrentTime.tv_sec - t->tv_sec;
-    usec=CurrentTime.tv_usec - t->tv_usec;
-    if (usec<0) {                                                                                                               // If the previous usec is higher than the current one
-        usec=1000000-t->tv_usec + CurrentTime.tv_usec;          // Recompute the microseonds
-        sec--;                                                                                                          // Substract one second
-    }
-    return sec*1000+usec/1000;
-	
-
-}
-
-
-

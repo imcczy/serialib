@@ -1,5 +1,5 @@
 
-CC=$(CROSS_COMPILE)gcc -g
+CC=$(CROSS_COMPILE)mips-openwrt-linux-gcc  -g
 
 TARGET=serialib
 
@@ -14,7 +14,7 @@ install: $(TARGET)
 	install *.h /usr/include/
 
 example: example.c $(TARGET)
-	$(CC) example.c -lserialib -L. -I. -o example
+	$(CC) example.c -lserialib  -std=c99 -L. -I. -o example
 
 example-write: example-write.c $(TARGET)
 	$(CC) example-write.c -lserialib -L. -I. -o example-write
